@@ -258,15 +258,19 @@ def get_mask_by_nn(point, case_name):
     # Validate input dimensions
     if img.ndim != 4:
         img = img[:, 0, :, :, :]
-        point = (12, 158, 183)
+        # point = (12, 158, 183)
         # raise ValueError("Input image must be 4D with shape (1, x, y, z)")
 
+
+    print("point from frontend x,y,z", point)
     session.set_image(img)
 
     # --- Define Output Buffer ---
     target_tensor = torch.zeros(img.shape[1:], dtype=torch.uint8)  # Must be 3D (x, y, z)
     session.set_target_buffer(target_tensor)
 
+    position = (point[2], point[1], point[0])
+    print("point from frontend z,y,x", position)
     # --- Interacting with the Model ---
     # Interactions can be freely chained and mixed in any order. Each interaction refines the segmentation.
     # The model updates the segmentation mask in the target buffer after every interaction.
@@ -274,7 +278,7 @@ def get_mask_by_nn(point, case_name):
     # Example: Add a **positive** point interaction
     # POINT_COORDINATES should be a tuple (x, y, z) specifying the point location.
 
-    session.add_point_interaction(point, include_interaction=True)
+    session.add_point_interaction(position, include_interaction=True)
     results = session.target_buffer.clone()
     volume = img[0]  # shape: (x, y, z)
     mask = results.cpu().numpy().astype(np.float32)
@@ -289,6 +293,8 @@ def get_mask_by_nn(point, case_name):
             rgba = np.zeros((slice_2d.shape[0], slice_2d.shape[1], 4), dtype=np.uint8)
             rgba[slice_2d == 1] = [0, 255, 0, 178]
             mask_json["label1"][z]["data"] = rgba.flatten().tolist()
+        else:
+            mask_json["label1"][z]["data"] = []
     with open(mask_json_path, "wb") as file:
         file.write(json.dumps(mask_json).encode('utf-8'))
 

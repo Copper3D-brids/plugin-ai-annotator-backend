@@ -91,7 +91,6 @@ async def get_tumour_position_tumour_center_clear():
 
 @router.post("/api/tumour_position/nn/mask")
 async def nn_mask(mask_data: model.TumourPositionNNMask):
-    print(mask_data)
     mask = get_mask_by_nn(mask_data.position, mask_data.caseId)
     return StreamingResponse(mask, media_type="application/json")
 

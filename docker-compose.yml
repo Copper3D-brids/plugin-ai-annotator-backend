@@ -1,0 +1,10 @@
+version: "3"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: backend_compose_dockerfile
+    ports:
+      - "8082:8082"
+    volumes:
+      - ~/desktop/docker/import_nrrd:/annotator_gui_backend/data/duke
